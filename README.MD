@@ -12,7 +12,7 @@ This project used Go Modules, so you will need to enable them using `export GO11
 
 The API is pretty simple, it just stores items which have a name, description and some tags, tags are a slice of strings. Name serves as the id for the Item. 
 
-``` json
+``` go
 provider "lsc-demo" {
   address = "localhost"
   port    = "38181"
