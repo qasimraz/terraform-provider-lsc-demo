@@ -1,9 +1,10 @@
 package provider
 
 import (
+	"qasimraz/terraform-provider-lsc-demo/api/client"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/qasimraz/terraform-provider-lsc-demo/api/client"
 )
 
 func Provider() terraform.ResourceProvider {
