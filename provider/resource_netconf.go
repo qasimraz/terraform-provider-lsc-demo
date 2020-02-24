@@ -30,18 +30,18 @@ func resourceNetconf() *schema.Resource {
 	}
 }
 
-func resourceCreateItem(d *schema.Resource, m interface{}) error {
-	return nil
-}
+// func resourceCreateItem(d *schema.Resource, m interface{}) error {
+// 	return nil
+// }
 
-func resourceReadItem(d *schema.Resource, m interface{}) error {
-	return nil
-}
+// func resourceReadItem(d *schema.Resource, m interface{}) error {
+// 	return nil
+// }
 
-func resourceUpdateItem(d *schema.Resource, m interface{}) error {
-	return nil
-}
+// func resourceUpdateItem(d *schema.Resource, m interface{}) error {
+// 	return nil
+// }
 
-func resourceDeleteItem(d *schema.Resource, m interface{}) error {
-	return nil
-}
+// func resourceDeleteItem(d *schema.Resource, m interface{}) error {
+// 	return nil
+// }
