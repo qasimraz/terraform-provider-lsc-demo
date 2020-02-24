@@ -9,12 +9,16 @@ import (
 func resourceNetconf() *schema.Resource {
 	fmt.Print()
 	return &schema.Resource{
+		Create: resourceCreateItem,
+		Read:   resourceReadItem,
+		Update: resourceUpdateItem,
+		Delete: resourceDeleteItem,
+		
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The name of the resource, also acts as it's unique ID",
-				ForceNew:    true,
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -22,16 +26,12 @@ func resourceNetconf() *schema.Resource {
 				Description: "A description of an item",
 			},
 		},
-		Create: resourceCreateItem,
-		Read:   resourceReadItem,
-		Update: resourceUpdateItem,
-		Delete: resourceDeleteItem,
-		Exists: resourceExistsItem,
+
 	}
 }
 
 func resourceCreateItem(d *schema.Resource, m interface{}) error {
-	return resourceReadItem(d, m)
+	return nil
 }
 
 func resourceReadItem(d *schema.Resource, m interface{}) error {
@@ -39,13 +39,9 @@ func resourceReadItem(d *schema.Resource, m interface{}) error {
 }
 
 func resourceUpdateItem(d *schema.Resource, m interface{}) error {
-	return resourceReadItem(d, m)
+	return nil
 }
 
 func resourceDeleteItem(d *schema.Resource, m interface{}) error {
 	return nil
-}
-
-func resourceExistsItem(d *schema.Resource, m interface{}) error {
-	return resourceReadItem(d, m)
 }
