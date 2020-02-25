@@ -1,10 +1,12 @@
-provider "example" {
+provider "lsc" {
   address = "http://localhost"
-  port    = "3001"
-  token   = "superSecretToken"
+  port    = "38181"
+  token   = "Basic YWRtaW46YWRtaW4="
 }
-
-resource "netconf_device" "test" {
-  name = "this_is_an_item"
-  description = "this is an item"
+resource "lsc_item" "cisco_2" {
+  name = "cisco_2"
+  port = "830"
+  ip_address = "127.0.1.2"
+  username = "root"
+  password = "root"
 }
