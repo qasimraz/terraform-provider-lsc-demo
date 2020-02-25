@@ -1,4 +1,4 @@
-terraform.tfstate
+terraform.tfstate*
 terraform-provider-lsc_*
 .terraform/plugins/darwin_amd64/lock.json
 crash.log

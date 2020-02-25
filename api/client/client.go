@@ -3,7 +3,6 @@ package client
 import (
 	"bytes"
 	"encoding/json"
-	"encoding/xml"
 	"fmt"
 	"io"
 	"log"
@@ -62,24 +61,20 @@ func (c *Client) DeleteNetconfMount(name string) error {
 
 // NetconfMount creates a new device mount point
 func (c *Client) NetconfMount(n *Netconf) error {
-	payload := (`{
-		"node": [
-			{
-				"node-id": "cisco1",
-				"netconf-node-topology:host": "207.226.253.52",
-				"netconf-node-topology:password": "root",
-				"netconf-node-topology:username": "root",
-				"netconf-node-topology:port": 830,
-				"netconf-node-topology:tcp-only": false,
-				"netconf-node-topology:keepalive-delay": 60
-			}
-		]
-	}`)
+
+	payload := (`{"node":[{"node-id":"cisco2","netconf-node-topology:host":"207.226.253.52","netconf-node-topology:password":"root","netconf-node-topology:username":"root","netconf-node-topology:port":830,"netconf-node-topology:tcp-only":false,"netconf-node-topology:keepalive-delay":60}]}`)
+
+	// textBytes := []byte(payload)
+
+	// err := json.Unmarshal([]byte(payload), data)
 
 	buf := bytes.Buffer{}
-	err := xml.NewEncoder(&buf).Encode(payload)
+	// err := json.NewEncoder(&buf).Encode(data)
+	_, err := buf.WriteString(payload)
 
-	_, err = c.httpRequest(fmt.Sprintf("restconf/config/network-topology:network-topology/topology/topology-netconf/node/%v", n.Name), "PUT", buf)
+	log.Printf("[DEBUG] Payload: ", buf)
+
+	_, err = c.httpRequest(fmt.Sprintf("restconf/config/network-topology:network-topology/topology/topology-netconf/node/%s", n.Name), "PUT", buf)
 	if err != nil {
 		return err
 	}
@@ -99,7 +94,7 @@ func (c *Client) httpRequest(path, method string, body bytes.Buffer) (closer io.
 		req.Header.Add("Content-Type", "application/json")
 	}
 
-	log.Printf("[DEBUG] API call:", req)
+	log.Printf("[DEBUG] API call: ", req)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
