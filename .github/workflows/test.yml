@@ -15,4 +15,4 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
     - name: Test
-      run: go test ./...
+      run: go build -o terraform-provider-lsc_v0.0.1
