@@ -6,6 +6,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 )
 
@@ -97,6 +98,8 @@ func (c *Client) httpRequest(path, method string, body bytes.Buffer) (closer io.
 	default:
 		req.Header.Add("Content-Type", "application/json")
 	}
+
+	log.Printf("[DEBUG] API call:", req)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
