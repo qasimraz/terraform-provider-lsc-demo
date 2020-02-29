@@ -5,25 +5,32 @@ This provider is to accompany Lumina SDN Controller as a Network Infrastructure 
 ## Requirements
 
 * go => 1.11
+* terraform => 0.12.21
 
 This project used Go Modules, so you will need to enable them using `export GO111MODULE=on`, otherwise your go commands (run, build and test) will fail.
 
+## Compiling the plugin
+``` sh
+go build -o terraform-provider-lsc_v0.0.1 && terraform init
+```
+
 ## Example
 
-The API is pretty simple, it just stores items which have a name, description and some tags, tags are a slice of strings. Name serves as the id for the Item. 
+The API is pretty simple, it mounts a device to an ODL controller running Netconf.
+Name serves as the id for the Item. 
 
 ``` go
-provider "lsc-demo" {
-  address = "localhost"
+provider "lsc" {
+  address = "http://localhost"
   port    = "38181"
   token   = "superSecretToken"
 }
 
-resource "netconf_device" "cisco_1" {
-  name = "cisco_1"
-  ip_address = "127.0.1.2"
-  vendor = "Cisco"
-  device_type = "Cisco XR"
-  os_version = "6.5.3"
+resource "lsc_netconf_device" "cisco1" {
+  name = "cisco1"
+  port = 830
+  ip_address = "123.226.253.52"
+  username = "root"
+  password = "root"
 }
 ```
