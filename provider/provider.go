@@ -27,7 +27,7 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"lsc_item": resourceItem(),
+			"lsc_netconf_device": resourceNetconfDevice(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

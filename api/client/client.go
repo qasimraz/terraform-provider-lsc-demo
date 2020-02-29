@@ -119,7 +119,7 @@ func (c *Client) httpRequest(path, method string, body bytes.Buffer) (closer io.
 		return nil, err
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
 		respBody := new(bytes.Buffer)
 		_, err := respBody.ReadFrom(resp.Body)
 		if err != nil {

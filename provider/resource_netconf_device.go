@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func resourceItem() *schema.Resource {
+func resourceNetconfDevice() *schema.Resource {
 	fmt.Print()
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -39,14 +39,14 @@ func resourceItem() *schema.Resource {
 				Description: "Password to authenticate to the device",
 			},
 		},
-		Create: resourceCreateItem,
-		Read:   resourceReadItem,
-		Update: resourceCreateItem,
-		Delete: resourceDeleteItem,
+		Create: resourceCreateNetconfDevice,
+		Read:   resourceReadNetconfDevice,
+		Update: resourceCreateNetconfDevice,
+		Delete: resourceDeleteNetconfDevice,
 	}
 }
 
-func resourceCreateItem(d *schema.ResourceData, m interface{}) error {
+func resourceCreateNetconfDevice(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
 	device := client.Netconf{
@@ -66,7 +66,7 @@ func resourceCreateItem(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceReadItem(d *schema.ResourceData, m interface{}) error {
+func resourceReadNetconfDevice(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
 	deviceID := d.Id()
@@ -88,7 +88,7 @@ func resourceReadItem(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceDeleteItem(d *schema.ResourceData, m interface{}) error {
+func resourceDeleteNetconfDevice(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
 	deviceID := d.Id()
