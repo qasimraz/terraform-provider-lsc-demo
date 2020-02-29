@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 )
@@ -19,11 +20,16 @@ type Client struct {
 
 // Netconf struct represents a Netconf Device Details
 type Netconf struct {
-	IPAddress string `json:"host"`
-	Name      string `json:"name"`
-	Port      string `json:"port"`
-	Username  string `json:"username"`
-	Password  string `json:"password"`
+	Name      string `json:"node-id"`
+	IPAddress string `json:"netconf-node-topology:host"`
+	Port      int    `json:"netconf-node-topology:port"`
+	Username  string `json:"netconf-node-topology:username"`
+	Password  string `json:"netconf-node-topology:password"`
+}
+
+// NetconfPayload struct
+type NetconfPayload struct {
+	Node []Netconf `json:"node"`
 }
 
 // NewClient returns a new Lumina SDN controller client
@@ -42,12 +48,25 @@ func (c *Client) GetNetconfMount(name string) (*Netconf, error) {
 	if err != nil {
 		return nil, err
 	}
-	item := &Netconf{}
-	err = json.NewDecoder(body).Decode(item)
+
+	bodyBytes, err := ioutil.ReadAll(body)
 	if err != nil {
+		log.Print("[Error]: ", err)
 		return nil, err
 	}
-	return item, nil
+
+	log.Printf("[DEBUG] GET Body: ", string(bodyBytes))
+
+	item := &NetconfPayload{}
+	err = json.Unmarshal(bodyBytes, item)
+	if err != nil {
+		log.Print("[Error]: ", err)
+		return nil, err
+	}
+
+	log.Printf("[DEBUG] Parsed Body: ", item)
+
+	return &item.Node[0], nil
 }
 
 // DeleteNetconfMount removes a netconf mount point from the controller
@@ -60,17 +79,14 @@ func (c *Client) DeleteNetconfMount(name string) error {
 }
 
 // NetconfMount creates a new device mount point
-func (c *Client) NetconfMount(n *Netconf) error {
+func (c *Client) NetconfMount(n Netconf) error {
 
-	payload := (`{"node":[{"node-id":"cisco2","netconf-node-topology:host":"207.226.253.52","netconf-node-topology:password":"root","netconf-node-topology:username":"root","netconf-node-topology:port":830,"netconf-node-topology:tcp-only":false,"netconf-node-topology:keepalive-delay":60}]}`)
-
-	// textBytes := []byte(payload)
-
-	// err := json.Unmarshal([]byte(payload), data)
+	payload := NetconfPayload{
+		Node: []Netconf{n},
+	}
 
 	buf := bytes.Buffer{}
-	// err := json.NewEncoder(&buf).Encode(data)
-	_, err := buf.WriteString(payload)
+	err := json.NewEncoder(&buf).Encode(payload)
 
 	log.Printf("[DEBUG] Payload: ", buf)
 
@@ -89,6 +105,8 @@ func (c *Client) httpRequest(path, method string, body bytes.Buffer) (closer io.
 	req.Header.Add("Authorization", c.authToken)
 	switch method {
 	case "GET":
+		req.Header.Add("Content-Type", "application/json")
+		req.Header.Add("Accept", "application/json")
 	case "DELETE":
 	default:
 		req.Header.Add("Content-Type", "application/json")

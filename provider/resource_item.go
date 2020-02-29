@@ -24,7 +24,7 @@ func resourceItem() *schema.Resource {
 				Description: "IP Address of Netconf Device",
 			},
 			"port": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeInt,
 				Required:    true,
 				Description: "Port of the Netconf Device, Default is 830",
 			},
@@ -51,13 +51,13 @@ func resourceCreateItem(d *schema.ResourceData, m interface{}) error {
 
 	device := client.Netconf{
 		Name:      d.Get("name").(string),
-		Port:      d.Get("port").(string),
+		Port:      d.Get("port").(int),
 		IPAddress: d.Get("ip_address").(string),
 		Username:  d.Get("username").(string),
 		Password:  d.Get("password").(string),
 	}
 
-	err := apiClient.NetconfMount(&device)
+	err := apiClient.NetconfMount(device)
 
 	if err != nil {
 		return err
@@ -87,10 +87,6 @@ func resourceReadItem(d *schema.ResourceData, m interface{}) error {
 	d.Set("password", device.Password)
 	return nil
 }
-
-// func resourceUpdateItem(d *schema.ResourceData, m interface{}) error {
-// 	return nil
-// }
 
 func resourceDeleteItem(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)

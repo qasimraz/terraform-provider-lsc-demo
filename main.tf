@@ -5,8 +5,8 @@ provider "lsc" {
 }
 resource "lsc_item" "cisco2" {
   name = "cisco2"
-  port = "830"
-  ip_address = "127.0.1.2"
+  port = 830
+  ip_address = "207.226.253.52"
   username = "root"
   password = "root"
 }
