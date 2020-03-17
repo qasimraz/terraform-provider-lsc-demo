@@ -1,7 +1,10 @@
 package provider
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"log"
 	"qasimraz/terraform-provider-lsc-demo/api/client"
 	"qasimraz/terraform-provider-lsc-demo/api/payload"
 	"strings"
@@ -58,7 +61,17 @@ func resourceCreateNetconfDevice(d *schema.ResourceData, m interface{}) error {
 		Password:  d.Get("password").(string),
 	}
 
-	err := apiClient.NetconfMount(device)
+	payloadBody := payload.NetconfPayload{ // Make into seperate function
+		Node: []payload.Netconf{device},
+	}
+
+	buf := bytes.Buffer{}
+	err := json.NewEncoder(&buf).Encode(payloadBody)
+	if err != nil {
+		return err
+	}
+
+	err = apiClient.PutNetconf(payload.NetconfMountURL(d.Get("name").(string)), buf)
 
 	if err != nil {
 		return err
@@ -71,7 +84,7 @@ func resourceReadNetconfDevice(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
 	deviceID := d.Id()
-	device, err := apiClient.GetNetconfMount(deviceID)
+	bodyBytes, err := apiClient.GetNetconf(payload.NetconfMountURL(d.Get("name").(string)))
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			d.SetId("")
@@ -79,6 +92,17 @@ func resourceReadNetconfDevice(d *schema.ResourceData, m interface{}) error {
 			return fmt.Errorf("error finding Item with ID %s", deviceID)
 		}
 	}
+
+	item := &payload.NetconfPayload{}
+	err = json.Unmarshal(bodyBytes, item)
+	if err != nil {
+		log.Print("[Error]: ", err)
+		return nil
+	}
+
+	var device = &item.Node[0]
+
+	log.Printf("[DEBUG] Parsed Body: ", item)
 
 	d.SetId(device.Name)
 	d.Set("name", device.Name)
@@ -94,7 +118,7 @@ func resourceDeleteNetconfDevice(d *schema.ResourceData, m interface{}) error {
 
 	deviceID := d.Id()
 
-	err := apiClient.DeleteNetconfMount(deviceID)
+	err := apiClient.DeleteNetconf(payload.NetconfMountURL(deviceID))
 	if err != nil {
 		return err
 	}

@@ -2,13 +2,11 @@ package client
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"qasimraz/terraform-provider-lsc-demo/api/payload"
 )
 
 // Client holds all of the information required to connect to a controller
@@ -29,9 +27,9 @@ func NewClient(hostname string, port int, token string) *Client {
 	}
 }
 
-// GetNetconfMount gets a netconf mount with a specific name from the controller
-func (c *Client) GetNetconfMount(name string) (*payload.Netconf, error) {
-	body, err := c.httpRequest(payload.NetconfMountURL(name), "GET", bytes.Buffer{})
+// GetNetconf gets a generic netconf endpoint with a url from the controller
+func (c *Client) GetNetconf(url string) ([]byte, error) {
+	body, err := c.httpRequest(url, "GET", bytes.Buffer{})
 	if err != nil {
 		return nil, err
 	}
@@ -44,40 +42,21 @@ func (c *Client) GetNetconfMount(name string) (*payload.Netconf, error) {
 
 	log.Printf("[DEBUG] GET Body: ", string(bodyBytes))
 
-	item := &payload.NetconfPayload{}
-	err = json.Unmarshal(bodyBytes, item)
-	if err != nil {
-		log.Print("[Error]: ", err)
-		return nil, err
-	}
-
-	log.Printf("[DEBUG] Parsed Body: ", item)
-
-	return &item.Node[0], nil
+	return bodyBytes, nil
 }
 
-// DeleteNetconfMount removes a netconf mount point from the controller
-func (c *Client) DeleteNetconfMount(name string) error {
-	_, err := c.httpRequest(payload.NetconfMountURL(name), "DELETE", bytes.Buffer{})
+// DeleteNetconf deletes a generic netconf endpoint from the controller
+func (c *Client) DeleteNetconf(url string) error {
+	_, err := c.httpRequest(url, "DELETE", bytes.Buffer{})
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-// NetconfMount creates a new device mount point
-func (c *Client) NetconfMount(n payload.Netconf) error {
-
-	payloadBody := payload.NetconfPayload{ // Make into seperate function
-		Node: []payload.Netconf{n},
-	}
-
-	buf := bytes.Buffer{}
-	err := json.NewEncoder(&buf).Encode(payloadBody)
-
-	log.Printf("[DEBUG] Payload: ", buf)
-
-	_, err = c.httpRequest(payload.NetconfMountURL(n.Name), "PUT", buf)
+// PutNetconf puts a netconf payload at a specific url mount point
+func (c *Client) PutNetconf(url string, payloadBody bytes.Buffer) error {
+	_, err := c.httpRequest(url, "PUT", payloadBody)
 	if err != nil {
 		return err
 	}
