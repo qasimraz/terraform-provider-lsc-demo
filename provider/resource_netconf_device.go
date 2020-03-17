@@ -3,6 +3,7 @@ package provider
 import (
 	"fmt"
 	"qasimraz/terraform-provider-lsc-demo/api/client"
+	"qasimraz/terraform-provider-lsc-demo/api/payload"
 	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
@@ -49,7 +50,7 @@ func resourceNetconfDevice() *schema.Resource {
 func resourceCreateNetconfDevice(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
-	device := client.Netconf{
+	device := payload.Netconf{
 		Name:      d.Get("name").(string),
 		Port:      d.Get("port").(int),
 		IPAddress: d.Get("ip_address").(string),

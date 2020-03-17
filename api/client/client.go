@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"qasimraz/terraform-provider-lsc-demo/api/payload"
 )
 
 // Client holds all of the information required to connect to a controller
@@ -16,20 +17,6 @@ type Client struct {
 	port       int
 	authToken  string
 	httpClient *http.Client
-}
-
-// Netconf struct represents a Netconf Device Details
-type Netconf struct {
-	Name      string `json:"node-id"`
-	IPAddress string `json:"netconf-node-topology:host"`
-	Port      int    `json:"netconf-node-topology:port"`
-	Username  string `json:"netconf-node-topology:username"`
-	Password  string `json:"netconf-node-topology:password"`
-}
-
-// NetconfPayload struct
-type NetconfPayload struct {
-	Node []Netconf `json:"node"`
 }
 
 // NewClient returns a new Lumina SDN controller client
@@ -43,8 +30,8 @@ func NewClient(hostname string, port int, token string) *Client {
 }
 
 // GetNetconfMount gets a netconf mount with a specific name from the controller
-func (c *Client) GetNetconfMount(name string) (*Netconf, error) {
-	body, err := c.httpRequest(fmt.Sprintf("restconf/config/network-topology:network-topology/topology/topology-netconf/node/%v", name), "GET", bytes.Buffer{})
+func (c *Client) GetNetconfMount(name string) (*payload.Netconf, error) {
+	body, err := c.httpRequest(payload.NetconfMountURL(name), "GET", bytes.Buffer{})
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +44,7 @@ func (c *Client) GetNetconfMount(name string) (*Netconf, error) {
 
 	log.Printf("[DEBUG] GET Body: ", string(bodyBytes))
 
-	item := &NetconfPayload{}
+	item := &payload.NetconfPayload{}
 	err = json.Unmarshal(bodyBytes, item)
 	if err != nil {
 		log.Print("[Error]: ", err)
@@ -71,7 +58,7 @@ func (c *Client) GetNetconfMount(name string) (*Netconf, error) {
 
 // DeleteNetconfMount removes a netconf mount point from the controller
 func (c *Client) DeleteNetconfMount(name string) error {
-	_, err := c.httpRequest(fmt.Sprintf("restconf/config/network-topology:network-topology/topology/topology-netconf/node/%v", name), "DELETE", bytes.Buffer{})
+	_, err := c.httpRequest(payload.NetconfMountURL(name), "DELETE", bytes.Buffer{})
 	if err != nil {
 		return err
 	}
@@ -79,25 +66,26 @@ func (c *Client) DeleteNetconfMount(name string) error {
 }
 
 // NetconfMount creates a new device mount point
-func (c *Client) NetconfMount(n Netconf) error {
+func (c *Client) NetconfMount(n payload.Netconf) error {
 
-	payload := NetconfPayload{
-		Node: []Netconf{n},
+	payloadBody := payload.NetconfPayload{ // Make into seperate function
+		Node: []payload.Netconf{n},
 	}
 
 	buf := bytes.Buffer{}
-	err := json.NewEncoder(&buf).Encode(payload)
+	err := json.NewEncoder(&buf).Encode(payloadBody)
 
 	log.Printf("[DEBUG] Payload: ", buf)
 
-	_, err = c.httpRequest(fmt.Sprintf("restconf/config/network-topology:network-topology/topology/topology-netconf/node/%s", n.Name), "PUT", buf)
+	_, err = c.httpRequest(payload.NetconfMountURL(n.Name), "PUT", buf)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *Client) httpRequest(path, method string, body bytes.Buffer) (closer io.ReadCloser, err error) {
+// httpRequest calls generic HTTP requests
+func (c *Client) httpRequest(path string, method string, body bytes.Buffer) (closer io.ReadCloser, err error) {
 	req, err := http.NewRequest(method, c.requestPath(path), &body)
 	if err != nil {
 		return nil, err
