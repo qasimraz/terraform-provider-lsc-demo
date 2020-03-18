@@ -22,26 +22,9 @@ type NetconfPayload struct {
 	Node []Netconf `json:"node"`
 }
 
-// CiscoInterface struct
-type CiscoInterface struct {
-	Active      string `json:"active"`
-	Name        string `json:"interface-name"`
-	Description string `json:"description"`
-}
-
-// CiscoInterfacePayload struct
-type CiscoInterfacePayload struct {
-	Node []CiscoInterface `json:"interface-configuration"`
-}
-
 // NetconfMountURL returns netconf mount URL - needs check for empty name?
 func NetconfMountURL(name string) string {
 	return fmt.Sprintf("restconf/config/network-topology:network-topology/topology/topology-netconf/node/%s", name)
-}
-
-// NetconfCiscoInterfaceURL returns netconf cisco interface URL
-func NetconfCiscoInterfaceURL(device string, interfaceName string) string {
-	return fmt.Sprintf("restconf/config/network-topology:network-topology/topology/topology-netconf/node/%s/yang-ext:mount/Cisco-IOS-XR-ifmgr-cfg:interface-configurations/interface-configuration/pre/%s", device, url.QueryEscape(interfaceName))
 }
 
 // NetconfMountPayload forms a json payload for Netconf Mount
@@ -73,6 +56,23 @@ func ParseNetconfMountPayload(bodyBytes []byte) (Netconf, error) {
 	return device, nil
 }
 
+// CiscoInterface struct
+type CiscoInterface struct {
+	Active      string `json:"active"`
+	Name        string `json:"interface-name"`
+	Description string `json:"description"`
+}
+
+// CiscoInterfacePayload struct
+type CiscoInterfacePayload struct {
+	Node []CiscoInterface `json:"interface-configuration"`
+}
+
+// NetconfCiscoInterfaceURL returns netconf cisco interface URL
+func NetconfCiscoInterfaceURL(device string, interfaceName string) string {
+	return fmt.Sprintf("restconf/config/network-topology:network-topology/topology/topology-netconf/node/%s/yang-ext:mount/Cisco-IOS-XR-ifmgr-cfg:interface-configurations/interface-configuration/pre/%s", device, url.QueryEscape(interfaceName))
+}
+
 // NetconfCiscoInterfacePayload forms a json payload for cisco interface
 func NetconfCiscoInterfacePayload(device CiscoInterface) (bytes.Buffer, error) {
 	payloadBody := CiscoInterfacePayload{ // Make into seperate function
@@ -99,5 +99,72 @@ func ParseNetconfCiscoInterfacePayload(bodyBytes []byte) (CiscoInterface, error)
 	log.Printf("[DEBUG] Parsed Body: ", item)
 
 	var device CiscoInterface = item.Node[0]
+	return device, nil
+}
+
+type CiscoVlanPayload struct {
+	Node []CiscoVlan `json:"interface-configuration"`
+}
+type Mtu struct {
+	Owner string `json:"owner"`
+	Mtu   int    `json:"mtu"`
+}
+type Mtus struct {
+	Mtu []Mtu `json:"mtu"`
+}
+type Encapsulation struct {
+	OuterTagType string `json:"outer-tag-type"`
+}
+type Rewrite struct {
+	InnerTagType  string `json:"inner-tag-type"`
+	InnerTagValue int    `json:"inner-tag-value"`
+	OuterTagType  string `json:"outer-tag-type"`
+	RewriteType   string `json:"rewrite-type"`
+	OuterTagValue int    `json:"outer-tag-value"`
+}
+type CiscoIOSXRL2EthInfraCfgEthernetService struct {
+	Encapsulation Encapsulation `json:"encapsulation"`
+	Rewrite       Rewrite       `json:"rewrite"`
+}
+type CiscoVlan struct {
+	Active                                 string                                 `json:"active"`
+	InterfaceName                          string                                 `json:"interface-name"`
+	Description                            string                                 `json:"description"`
+	Mtus                                   Mtus                                   `json:"mtus"`
+	InterfaceModeNonPhysical               string                                 `json:"interface-mode-non-physical"`
+	CiscoIOSXRL2EthInfraCfgEthernetService CiscoIOSXRL2EthInfraCfgEthernetService `json:"Cisco-IOS-XR-l2-eth-infra-cfg:ethernet-service"`
+}
+
+// NetconfCiscoVlanURL returns netconf cisco interface URL
+func NetconfCiscoVlanURL(device string, interfaceName string) string {
+	return fmt.Sprintf("restconf/config/network-topology:network-topology/topology/topology-netconf/node/%s/yang-ext:mount/Cisco-IOS-XR-ifmgr-cfg:interface-configurations/interface-configuration/pre/%s", device, url.QueryEscape(interfaceName))
+}
+
+// NetconfCiscoVlanPayload forms a json payload for cisco interface
+func NetconfCiscoVlanPayload(device CiscoVlan) (bytes.Buffer, error) {
+	payloadBody := CiscoVlanPayload{ // Make into seperate function
+		Node: []CiscoVlan{device},
+	}
+
+	buf := bytes.Buffer{}
+	err := json.NewEncoder(&buf).Encode(payloadBody)
+	if err != nil {
+		return buf, err
+	}
+	return buf, nil
+}
+
+// ParseNetconfCiscoVlanPayload parses json payload for cisco interface to a struct
+func ParseNetconfCiscoVlanPayload(bodyBytes []byte) (CiscoVlan, error) {
+	item := &CiscoVlanPayload{}
+	err := json.Unmarshal(bodyBytes, item)
+	if err != nil {
+		log.Print("[Error]: ", err)
+		return CiscoVlan{}, err
+	}
+
+	log.Printf("[DEBUG] Parsed Body: ", item)
+
+	var device CiscoVlan = item.Node[0]
 	return device, nil
 }

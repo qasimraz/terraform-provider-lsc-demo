@@ -30,6 +30,7 @@ func Provider() terraform.ResourceProvider {
 		ResourcesMap: map[string]*schema.Resource{
 			"lsc_netconf_device":  resourceNetconfDevice(),
 			"lsc_cisco_interface": resourceCiscoInterface(),
+			"lsc_cisco_vlan":      resourceCiscoVlan(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

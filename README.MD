@@ -14,6 +14,10 @@ This project used Go Modules, so you will need to enable them using `export GO11
 go build -o terraform-provider-lsc_v0.0.1 && terraform init
 ```
 
+## Known Issues
+* Terraform makes API calls in parallel which LSC can't handle due to locking - Might implement re-try to fix this
+* Terraform makes consquent calls too fast after first mount, need to add operational checking to verify mount completion
+
 ## Example
 
 The API is pretty simple, it mounts a device to an ODL controller running Netconf.
@@ -38,6 +42,19 @@ resource "lsc_cisco_interface" "GigabitEthernet_0_0_0_4" {
   device = lsc_netconf_device.cisco1.name
   name = "GigabitEthernet0/0/0/4"
   description = "Terraform Test"
+}
+
+// This only creates a preconfig vlan
+resource "lsc_cisco_vlan" "GigabitEthernet_0_0_0_4_1" {
+  device = lsc_netconf_device.cisco1.name
+  name = "GigabitEthernet0/0/0/4.1"
+  description = "Terraform Test"
+  mtu = 9216
+  interface_mode = "l2-transport"
+  outer_tag_type = "match-untagged"
+  tag_type = "match-dot1q"
+  inner_tag = 9
+  outer_tag = 2
 }
 ```
 
