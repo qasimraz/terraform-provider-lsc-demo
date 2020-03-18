@@ -67,3 +67,6 @@ resource "lsc_cisco_l2vpn" "l2vpn_eviid_9" {
 
 ## Helpful Tools
 * JSon to go struct - https://mholt.github.io/json-to-go/
+
+## Dependency graph
+![LSC L2vpn dependency graph](/graph.svg)
