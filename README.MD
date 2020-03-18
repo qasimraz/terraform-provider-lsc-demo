@@ -40,3 +40,6 @@ resource "lsc_cisco_interface" "GigabitEthernet_0_0_0_4" {
   description = "Terraform Test"
 }
 ```
+
+## Helpful Tools
+* JSon to go struct - https://mholt.github.io/json-to-go/
