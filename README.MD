@@ -18,6 +18,8 @@ go build -o terraform-provider-lsc_v0.0.1 && terraform init
 * Terraform makes API calls in parallel which LSC can't handle due to locking - Might implement re-try to fix this
 * Terraform makes consquent calls too fast after first mount, need to add operational checking to verify mount completion
 
+Possible fix - https://www.terraform.io/docs/extend/resources/retries-and-customizable-timeouts.html
+
 ## Example
 
 The API is pretty simple, it mounts a device to an ODL controller running Netconf.
