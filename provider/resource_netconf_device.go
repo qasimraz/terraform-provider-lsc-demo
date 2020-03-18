@@ -1,13 +1,10 @@
 package provider
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"log"
 	"qasimraz/terraform-provider-lsc-demo/api/client"
 	"qasimraz/terraform-provider-lsc-demo/api/payload"
-	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -61,21 +58,20 @@ func resourceCreateNetconfDevice(d *schema.ResourceData, m interface{}) error {
 		Password:  d.Get("password").(string),
 	}
 
-	payloadBody := payload.NetconfPayload{ // Make into seperate function
-		Node: []payload.Netconf{device},
-	}
+	url := payload.NetconfMountURL(d.Get("name").(string))
 
-	buf := bytes.Buffer{}
-	err := json.NewEncoder(&buf).Encode(payloadBody)
+	payloadBody, err := payload.NetconfMountPayload(device)
 	if err != nil {
-		return err
+		log.Print("[Error]: ", err)
+		return nil
 	}
 
-	err = apiClient.PutNetconf(payload.NetconfMountURL(d.Get("name").(string)), buf)
-
+	err = apiClient.PutNetconf(url, payloadBody)
 	if err != nil {
-		return err
+		log.Print("[Error]: ", err)
+		return nil
 	}
+
 	d.SetId(device.Name)
 	return nil
 }
@@ -83,26 +79,19 @@ func resourceCreateNetconfDevice(d *schema.ResourceData, m interface{}) error {
 func resourceReadNetconfDevice(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
-	deviceID := d.Id()
-	bodyBytes, err := apiClient.GetNetconf(payload.NetconfMountURL(d.Get("name").(string)))
-	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
-			d.SetId("")
-		} else {
-			return fmt.Errorf("error finding Item with ID %s", deviceID)
-		}
-	}
+	url := payload.NetconfMountURL(d.Get("name").(string))
 
-	item := &payload.NetconfPayload{}
-	err = json.Unmarshal(bodyBytes, item)
+	bodyBytes, err := apiClient.GetNetconf(url)
 	if err != nil {
 		log.Print("[Error]: ", err)
 		return nil
 	}
 
-	var device = &item.Node[0]
-
-	log.Printf("[DEBUG] Parsed Body: ", item)
+	device, err := payload.ParseNetconfMountPayload(bodyBytes)
+	if err != nil {
+		log.Print("[Error]: ", err)
+		return nil
+	}
 
 	d.SetId(device.Name)
 	d.Set("name", device.Name)
@@ -116,12 +105,14 @@ func resourceReadNetconfDevice(d *schema.ResourceData, m interface{}) error {
 func resourceDeleteNetconfDevice(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
-	deviceID := d.Id()
+	url := payload.NetconfMountURL(d.Get("name").(string))
 
-	err := apiClient.DeleteNetconf(payload.NetconfMountURL(deviceID))
+	err := apiClient.DeleteNetconf(url)
 	if err != nil {
-		return err
+		log.Print("[Error]: ", err)
+		return nil
 	}
+
 	d.SetId("")
 	return nil
 }

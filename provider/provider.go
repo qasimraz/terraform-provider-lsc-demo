@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
+// Provider is the main terraform object
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
@@ -27,8 +28,8 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"lsc_netconf_device": resourceNetconfDevice(),
-			// "lsc_cisco_interface": resourceCiscoInterface(),
+			"lsc_netconf_device":  resourceNetconfDevice(),
+			"lsc_cisco_interface": resourceCiscoInterface(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

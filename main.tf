@@ -10,9 +10,9 @@ resource "lsc_netconf_device" "cisco1" {
   username = "root"
   password = "root"
 }
-
-# resource "lsc_cisco_interface" "GigabitEthernet0/0/0/4" {
-#   device = lsc_netconf_device.cisco1.name
-#   interface_name = "GigabitEthernet0/0/0/4"
-#   description = "Terraform Test"
-# }
+// This only creates a preconfig interface
+resource "lsc_cisco_interface" "GigabitEthernet_0_0_0_4" {
+  device = lsc_netconf_device.cisco1.name
+  name = "GigabitEthernet0/0/0/4"
+  description = "Terraform Test"
+}
