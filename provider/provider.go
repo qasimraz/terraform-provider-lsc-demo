@@ -31,6 +31,7 @@ func Provider() terraform.ResourceProvider {
 			"lsc_netconf_device":  resourceNetconfDevice(),
 			"lsc_cisco_interface": resourceCiscoInterface(),
 			"lsc_cisco_vlan":      resourceCiscoVlan(),
+			"lsc_cisco_l2vpn":     resourceCiscoL2VPN(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

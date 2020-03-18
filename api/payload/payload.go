@@ -168,3 +168,51 @@ func ParseNetconfCiscoVlanPayload(bodyBytes []byte) (CiscoVlan, error) {
 	var device CiscoVlan = item.Node[0]
 	return device, nil
 }
+
+type CiscoL2VPNPayload struct {
+	Node []CiscoL2VPN `json:"vlan-aware-flexible-xconnect-service"`
+}
+type VlanAwareFxcAttachmentCircuit struct {
+	Name string `json:"name"`
+}
+type VlanAwareFxcAttachmentCircuits struct {
+	VlanAwareFxcAttachmentCircuit []VlanAwareFxcAttachmentCircuit `json:"vlan-aware-fxc-attachment-circuit"`
+}
+type CiscoL2VPN struct {
+	Eviid                          int                            `json:"eviid"`
+	VlanAwareFxcAttachmentCircuits VlanAwareFxcAttachmentCircuits `json:"vlan-aware-fxc-attachment-circuits"`
+}
+
+// NetconfCiscoL2VPNURL returns netconf cisco interface URL
+func NetconfCiscoL2VPNURL(device string, eviid int) string {
+	return fmt.Sprintf("restconf/config/network-topology:network-topology/topology/topology-netconf/node/%s/yang-ext:mount/Cisco-IOS-XR-l2vpn-cfg:l2vpn/database/flexible-xconnect-service-table/vlan-aware-flexible-xconnect-services/vlan-aware-flexible-xconnect-service/%d", device, eviid)
+}
+
+// NetconfCiscoL2VPNPayload forms a json payload for cisco interface
+func NetconfCiscoL2VPNPayload(device CiscoL2VPN) (bytes.Buffer, error) {
+	payloadBody := CiscoL2VPNPayload{ // Make into seperate function
+		Node: []CiscoL2VPN{device},
+	}
+
+	buf := bytes.Buffer{}
+	err := json.NewEncoder(&buf).Encode(payloadBody)
+	if err != nil {
+		return buf, err
+	}
+	return buf, nil
+}
+
+// ParseNetconfCiscoL2VPNPayload parses json payload for cisco interface to a struct
+func ParseNetconfCiscoL2VPNPayload(bodyBytes []byte) (CiscoL2VPN, error) {
+	item := &CiscoL2VPNPayload{}
+	err := json.Unmarshal(bodyBytes, item)
+	if err != nil {
+		log.Print("[Error]: ", err)
+		return CiscoL2VPN{}, err
+	}
+
+	log.Printf("[DEBUG] Parsed Body: ", item)
+
+	var device CiscoL2VPN = item.Node[0]
+	return device, nil
+}
