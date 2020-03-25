@@ -7,6 +7,7 @@ import (
 	"qasimraz/terraform-provider-lsc-demo/api/payload"
 	"strconv"
 
+	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -70,15 +71,15 @@ func resourceCreateCiscoL2VPN(d *schema.ResourceData, m interface{}) error {
 		return nil
 	}
 
-	err = apiClient.PutNetconf(url, payloadBody)
-	if err != nil {
-		log.Print("[Error]: ", err)
-		return nil
-	}
-	//convert eviid to string
-	id := strconv.Itoa(device.Eviid)
-	d.SetId(id)
-	return nil
+	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
+		err = apiClient.PutNetconf(url, payloadBody)
+
+		if err != nil {
+			return resource.RetryableError(fmt.Errorf("Error from controller: %s", err))
+		}
+
+		return resource.NonRetryableError(resourceReadCiscoL2VPN(d, m))
+	})
 }
 
 func resourceReadCiscoL2VPN(d *schema.ResourceData, m interface{}) error {

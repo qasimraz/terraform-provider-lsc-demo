@@ -34,6 +34,16 @@ resource "lsc_cisco_interface" "GigabitEthernet_0_0_0_5" {
   name = "GigabitEthernet0/0/0/5"
   description = "Terraform Test"
 }
+resource "lsc_cisco_interface" "GigabitEthernet_0_0_0_6" {
+  device = lsc_netconf_device.cisco1.name
+  name = "GigabitEthernet0/0/0/6"
+  description = "Terraform Test"
+}
+resource "lsc_cisco_interface" "GigabitEthernet_0_0_0_7" {
+  device = lsc_netconf_device.cisco1.name
+  name = "GigabitEthernet0/0/0/7"
+  description = "Terraform Test"
+}
 // This only creates a preconfig vlan
 resource "lsc_cisco_vlan" "GigabitEthernet_0_0_0_5_1" {
   device = lsc_netconf_device.cisco1.name

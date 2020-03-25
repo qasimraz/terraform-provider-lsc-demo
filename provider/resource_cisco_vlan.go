@@ -6,6 +6,7 @@ import (
 	"qasimraz/terraform-provider-lsc-demo/api/client"
 	"qasimraz/terraform-provider-lsc-demo/api/payload"
 
+	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -107,14 +108,15 @@ func resourceCreateCiscoVlan(d *schema.ResourceData, m interface{}) error {
 		return nil
 	}
 
-	err = apiClient.PutNetconf(url, payloadBody)
-	if err != nil {
-		log.Print("[Error]: ", err)
-		return nil
-	}
+	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
+		err = apiClient.PutNetconf(url, payloadBody)
 
-	d.SetId(device.InterfaceName)
-	return nil
+		if err != nil {
+			return resource.RetryableError(fmt.Errorf("Error from controller: %s", err))
+		}
+
+		return resource.NonRetryableError(resourceReadCiscoVlan(d, m))
+	})
 }
 
 func resourceReadCiscoVlan(d *schema.ResourceData, m interface{}) error {
