@@ -15,7 +15,7 @@ go build -o terraform-provider-lsc_v0.0.1 && terraform init
 ```
 
 ## Known Issues
-* None
+* Netconf mount infinite retry attempts unless terraform is exited
 
 ## Example
 

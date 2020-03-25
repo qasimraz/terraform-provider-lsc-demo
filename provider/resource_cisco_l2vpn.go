@@ -41,6 +41,9 @@ func resourceCiscoL2VPN() *schema.Resource {
 		Read:   resourceReadCiscoL2VPN,
 		Update: resourceCreateCiscoL2VPN,
 		Delete: resourceDeleteCiscoL2VPN,
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(45 * time.Second),
+		}}
 	}
 }
 

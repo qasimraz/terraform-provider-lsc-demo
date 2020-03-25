@@ -75,7 +75,7 @@ func resourceCreateNetconfDevice(d *schema.ResourceData, m interface{}) error {
 
 	// Verify netconf mount connects succesfully
 	for {
-		time.Sleep(time.Second)
+		time.Sleep(5 * time.Second)
 		url := payload.NetconfMountURLOperational(d.Get("name").(string))
 		bodyBytes, err := apiClient.GetNetconf(url)
 		if err != nil {

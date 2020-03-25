@@ -65,6 +65,9 @@ func resourceCiscoVlan() *schema.Resource {
 		Read:   resourceReadCiscoVlan,
 		Update: resourceCreateCiscoVlan,
 		Delete: resourceDeleteCiscoVlan,
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(45 * time.Second),
+		}}
 	}
 }
 
