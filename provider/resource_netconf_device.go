@@ -5,6 +5,7 @@ import (
 	"log"
 	"qasimraz/terraform-provider-lsc-demo/api/client"
 	"qasimraz/terraform-provider-lsc-demo/api/payload"
+	"time"
 
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -70,6 +71,27 @@ func resourceCreateNetconfDevice(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		log.Print("[Error]: ", err)
 		return nil
+	}
+
+	// Verify netconf mount connects succesfully
+	for {
+		time.Sleep(time.Second)
+		url := payload.NetconfMountURLOperational(d.Get("name").(string))
+		bodyBytes, err := apiClient.GetNetconf(url)
+		if err != nil {
+			log.Print("[Error]: ", err)
+			return nil
+		}
+
+		device, err := payload.ParseNetconfOperationalMountPayload(bodyBytes)
+		if err != nil {
+			log.Print("[Error]: ", err)
+			return nil
+		}
+		log.Print("[Status]: ", device.Status)
+		if device.Status == "connected" {
+			break
+		}
 	}
 
 	d.SetId(device.Name)

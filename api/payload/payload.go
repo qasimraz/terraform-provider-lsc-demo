@@ -17,14 +17,32 @@ type Netconf struct {
 	Password  string `json:"netconf-node-topology:password"`
 }
 
+// NetconfOperational struct represents a Netconf Opertaional Device Details
+type NetconfOperational struct {
+	Name      string `json:"node-id"`
+	IPAddress string `json:"netconf-node-topology:host"`
+	Port      int    `json:"netconf-node-topology:port"`
+	Status    string `json:"netconf-node-topology:connection-status"`
+}
+
 // NetconfPayload struct
 type NetconfPayload struct {
 	Node []Netconf `json:"node"`
 }
 
+// NetconfPayloadOperational struct
+type NetconfPayloadOperational struct {
+	Node []NetconfOperational `json:"node"`
+}
+
 // NetconfMountURL returns netconf mount URL - needs check for empty name?
 func NetconfMountURL(name string) string {
 	return fmt.Sprintf("restconf/config/network-topology:network-topology/topology/topology-netconf/node/%s", name)
+}
+
+// NetconfMountURLOperational returns netconf mount Operational URL - needs check for empty name?
+func NetconfMountURLOperational(name string) string {
+	return fmt.Sprintf("restconf/operational/network-topology:network-topology/topology/topology-netconf/node/%s", name)
 }
 
 // NetconfMountPayload forms a json payload for Netconf Mount
@@ -53,6 +71,21 @@ func ParseNetconfMountPayload(bodyBytes []byte) (Netconf, error) {
 	log.Printf("[DEBUG] Parsed Body: ", item)
 
 	var device Netconf = item.Node[0]
+	return device, nil
+}
+
+// ParseNetconfOperationalMountPayload parses the json netconf mount payload to a struct
+func ParseNetconfOperationalMountPayload(bodyBytes []byte) (NetconfOperational, error) {
+	item := &NetconfPayloadOperational{}
+	err := json.Unmarshal(bodyBytes, item)
+	if err != nil {
+		log.Print("[Error]: ", err)
+		return NetconfOperational{}, err
+	}
+
+	log.Printf("[DEBUG] Parsed Body: ", item)
+
+	var device NetconfOperational = item.Node[0]
 	return device, nil
 }
 
