@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"qasimraz/terraform-provider-lsc-demo/api/client"
@@ -129,6 +130,11 @@ func resourceReadCiscoVlan(d *schema.ResourceData, m interface{}) error {
 
 	bodyBytes, err := apiClient.GetNetconf(url)
 	if err != nil {
+		log.Print("[Error] GET: ", err)
+		if errors.Is(err, client.ErrNotFound) {
+			d.SetId("")
+			return nil
+		}
 		return err
 	}
 

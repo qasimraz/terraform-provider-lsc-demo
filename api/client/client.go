@@ -2,12 +2,16 @@ package client
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 )
+
+// ErrNotFound is the error for a HTTP 404
+var ErrNotFound = errors.New("not found")
 
 // Client holds all of the information required to connect to a controller
 type Client struct {
@@ -82,7 +86,9 @@ func (c *Client) httpRequest(path string, method string, body bytes.Buffer) (clo
 	log.Printf("[DEBUG] API call: ", req)
 
 	resp, err := c.httpClient.Do(req)
+
 	if err != nil {
+		log.Printf("[DEBUG] API Error: ", err)
 		return nil, err
 	}
 
@@ -91,6 +97,9 @@ func (c *Client) httpRequest(path string, method string, body bytes.Buffer) (clo
 		_, err := respBody.ReadFrom(resp.Body)
 		if err != nil {
 			return nil, fmt.Errorf("got a non 200 status code: %v", resp.StatusCode)
+		}
+		if resp.StatusCode == http.StatusNotFound {
+			return nil, fmt.Errorf("404 Notfound: %w", ErrNotFound)
 		}
 		return nil, fmt.Errorf("got a non 200 status code: %v - %s", resp.StatusCode, respBody.String())
 	}
