@@ -5,7 +5,9 @@ import (
 	"log"
 	"qasimraz/terraform-provider-lsc-demo/api/client"
 	"qasimraz/terraform-provider-lsc-demo/api/payload"
+	"time"
 
+	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -34,7 +36,9 @@ func resourceCiscoInterface() *schema.Resource {
 		Read:   resourceReadCiscoInterface,
 		Update: resourceCreateCiscoInterface,
 		Delete: resourceDeleteCiscoInterface,
-	}
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(45 * time.Second),
+		}}
 }
 
 func resourceCreateCiscoInterface(d *schema.ResourceData, m interface{}) error {
@@ -54,14 +58,15 @@ func resourceCreateCiscoInterface(d *schema.ResourceData, m interface{}) error {
 		return nil
 	}
 
-	err = apiClient.PutNetconf(url, payloadBody)
-	if err != nil {
-		log.Print("[Error]: ", err)
-		return nil
-	}
+	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
+		err = apiClient.PutNetconf(url, payloadBody)
 
-	d.SetId(device.Name)
-	return nil
+		if err != nil {
+			return resource.RetryableError(fmt.Errorf("Error from controller: %s", err))
+		}
+
+		return resource.NonRetryableError(resourceReadCiscoInterface(d, m))
+	})
 }
 
 func resourceReadCiscoInterface(d *schema.ResourceData, m interface{}) error {
