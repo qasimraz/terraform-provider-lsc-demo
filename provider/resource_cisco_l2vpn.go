@@ -6,6 +6,7 @@ import (
 	"qasimraz/terraform-provider-lsc-demo/api/client"
 	"qasimraz/terraform-provider-lsc-demo/api/payload"
 	"strconv"
+	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -44,7 +45,6 @@ func resourceCiscoL2VPN() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(45 * time.Second),
 		}}
-	}
 }
 
 func resourceCreateCiscoL2VPN(d *schema.ResourceData, m interface{}) error {

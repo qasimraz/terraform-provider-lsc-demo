@@ -5,6 +5,7 @@ import (
 	"log"
 	"qasimraz/terraform-provider-lsc-demo/api/client"
 	"qasimraz/terraform-provider-lsc-demo/api/payload"
+	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -68,7 +69,6 @@ func resourceCiscoVlan() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(45 * time.Second),
 		}}
-	}
 }
 
 func resourceCreateCiscoVlan(d *schema.ResourceData, m interface{}) error {
