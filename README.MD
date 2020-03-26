@@ -4,14 +4,14 @@ This provider is to accompany Lumina SDN Controller as a Network Infrastructure 
 
 ## Requirements
 
-* go => 1.11
+* go => 1.13
 * terraform => 0.12.21
 
 This project used Go Modules, so you will need to enable them using `export GO111MODULE=on`, otherwise your go commands (run, build and test) will fail.
 
 ## Compiling the plugin
 ``` sh
-go build -o terraform-provider-lsc_v0.0.1 && terraform init
+go build -o terraform-provider-lsc_v0.4 && terraform init
 ```
 
 ## Known Issues
