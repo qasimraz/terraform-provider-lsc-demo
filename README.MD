@@ -45,6 +45,7 @@ resource "lsc_cisco_interface" "GigabitEthernet_0_0_0_4" {
 // Creates a vlan
 resource "lsc_cisco_vlan" "GigabitEthernet_0_0_0_4_1" {
   device = lsc_netconf_device.cisco1.name
+  interface = lsc_cisco_interface.GigabitEthernet_0_0_0_4.name
   name = "GigabitEthernet0/0/0/4.1"
   description = "Terraform Test"
   mtu = 9216
