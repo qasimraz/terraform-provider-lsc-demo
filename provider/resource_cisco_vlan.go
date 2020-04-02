@@ -22,6 +22,11 @@ func resourceCiscoVlan() *schema.Resource {
 				Description: "The name of the vlan resource",
 				ForceNew:    true,
 			},
+			"interface": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "interface for dependency",
+			},
 			"description": {
 				Type:        schema.TypeString,
 				Required:    true,
